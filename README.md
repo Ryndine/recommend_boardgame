@@ -82,8 +82,63 @@ df_elbow = pd.DataFrame(elbow_data)
 ```
 ![elbow_graph](https://github.com/Ryndine/recommend_boardgame/blob/main/Images/elbow.jpeg)
 
+We decided the best clustering for our data was 4, so we ran a simple script to cluster the data.
+```
+def get_clusters(k, data):
+    # Initialize the K-Means model
+    model = KMeans(n_clusters=k, random_state=0)
+    # Train the model
+    model.fit(data)
+    # Create return DataFrame with predicted clusters
+    data["class"] = model.labels_
+    return data
+clusters = get_clusters(4, ml_df)
+```
+![elbow_graph](https://github.com/Ryndine/recommend_boardgame/blob/main/Images/clusters.jpeg)
+
+Unfortunately our plotting of the clusters doesn't reveal anything meaningful, so we moved forward with training and testing.
+
 **K Nearest Neighbor Accuracy**
 
+To start the KNN treain & test, we dropped "ID" from the database since we're trying to find how accurate predicting boardgames would be.
+```
+y = clusters['ID']
+X = clusters.drop(columns='ID')
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+knn = KNeighborsClassifier(n_neighbors = 5)
+knn.fit(X_train, y_train)
+```
+We create our X and Y train and test variables and fir the training to the KNN algorithm.
+```
+knn.score(X_train, y_train)
+knn.score(X_test, y_test)
+```
+Unfortunately our scores for KNN returned results of .17 for train, and .0 for test. We tried cleaning the data further, adjusting clusters, and cuttoff points for the categories, and different variables. However, the results never went beyond .20 accuracy.
+
 **Keras Accuracy**
+
+Due to KNN yielding unsatisfactory results, we looking towards neural networks for a different approach. We ran the same train and test variables into Keras and started by preparing the variables and hyperparameters. 
+```
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=78)
+(x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
+x_train = x_train.reshape(-1, 28*28)
+x_train = x_train.astype('float32') / 255
+y_train = tf.keras.utils.to_categorical(y_train , num_classes=10)
+```
+For our hyperparameters we're using a relu layer and a softmax layer.
+```
+nn_model = tf.keras.models.Sequential()
+nn_model.add(tf.keras.layers.Dense(100, input_dim=784, activation="relu"))
+nn_model.add(tf.keras.layers.Dense(10, activation="softmax"))
+nn_model.compile(loss="categorical_crossentropy", optimizer="SGD", metrics=["accuracy"])
+```
+Then fitting the model to check the accuracy.
+```
+fit_model = nn_model.fit(x_train, y_train, batch_size=200, epochs=20, verbose=1)
+model_loss, model_accuracy = nn_model.evaluate(x_train,y_train,verbose=1)
+print(f"Loss: {model_loss}, Accuracy: {model_accuracy}")
+```
+
+The final score being a Loss of .26 and Accuracy of .92.
 
 ## Part 2: Recommendation System with Collborative Filtering
