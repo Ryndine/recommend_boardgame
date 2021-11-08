@@ -143,6 +143,7 @@ print(f"Loss: {model_loss}, Accuracy: {model_accuracy}")
 The final score being a Loss of .26 and Accuracy of .92. Unfortunately myself and the team don't exactly understand why the score improved so much. These results are something we plan on looking into far more now that the project is over.
 
 ## Part 2: Recommendation System with Collaborative Filtering
+[Ryan Mangeno](https://github.com/Ryndine)
 
 For now, I wanted to return to the project and create a collaborative filter based recommendation system, seen [here](https://github.com/Ryndine/recommend_boardgame/blob/main/collab_recommend.ipynb).
 
