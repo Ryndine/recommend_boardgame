@@ -94,7 +94,7 @@ def get_clusters(k, data):
     return data
 clusters = get_clusters(4, ml_df)
 ```
-![elbow_graph](https://github.com/Ryndine/recommend_boardgame/blob/main/Images/clusters.jpeg)
+![clusters_graph](https://github.com/Ryndine/recommend_boardgame/blob/main/Images/clusters.jpeg)
 
 Unfortunately our plotting of the clusters doesn't reveal anything meaningful, so we moved forward with training and testing.
 
@@ -138,7 +138,81 @@ fit_model = nn_model.fit(x_train, y_train, batch_size=200, epochs=20, verbose=1)
 model_loss, model_accuracy = nn_model.evaluate(x_train,y_train,verbose=1)
 print(f"Loss: {model_loss}, Accuracy: {model_accuracy}")
 ```
+![accuracy_graph](https://github.com/Ryndine/recommend_boardgame/blob/main/Images/accuracy.jpeg)
 
-The final score being a Loss of .26 and Accuracy of .92.
+The final score being a Loss of .26 and Accuracy of .92. Unfortunately myself and the team don't exactly understand why the score improved so much. These results are something we plan on looking into far more now that the project is over.
 
-## Part 2: Recommendation System with Collborative Filtering
+## Part 2: Recommendation System with Collaborative Filtering
+
+For now, I wanted to return to the project and create a collaborative filter based recommendation system, seen [here](https://github.com/Ryndine/recommend_boardgame/blob/main/collab_recommend.ipynb).
+
+To do this I'm starting by taking my cleaned dataframe and dropping "Ratings" and "Complexity". I do not want to focus on these variables for this recommender.
+```
+data = boardgame_final.drop(['Avg Rating', 'Complexity'], axis=1)
+# Create a new dataframe without the user ids.
+data_items = data.drop('ID', axis=1)
+data_items = data_items.set_index('Name')
+data_items.head()
+```
+Next I needed to further prepare the database. I wanted to have my boardgames as columns and my categories as rows. To do this I transposed the dataframe, create a new index for the category rows, clean up for type errors, then create two separate dataframes for later.
+```
+data_items = pd.DataFrame.transpose(data_items)
+data_items.reset_index(level=0, inplace=True)
+data_items = data_items.rename(columns={'index': 'Name'})
+data_items.columns.names = ['']
+# Save save current dataframe for reading category names.
+data = data_items
+# Drop name to create a second DF with only integers.
+data_items = data_items.drop('Name', axis=1)
+data_items.head()
+```
+Moving forward I now have a Dataframe with Names, and a dataframe that is completely binary. Using the binary dataframe I can calculate simularity between boardgames using the cosine simularity from sklearn.
+```
+# BG-BG CALCULATIONS
+
+magnitude = np.sqrt(np.square(data_items).sum(axis=1))
+
+data_items = data_items.divide(magnitude, axis='index')
+
+def calculate_similarity(data_items):
+    data_sparse = sparse.csr_matrix(data_items)
+    similarities = cosine_similarity(data_sparse.transpose())
+    sim = pd.DataFrame(data=similarities, index= data_items.columns, columns= data_items.columns)
+    return sim
+
+data_matrix = calculate_similarity(data_items)
+```
+```
+print(data_matrix.loc['Gloomhaven'].nlargest(11))
+```
+![test](https://github.com/Ryndine/recommend_boardgame/blob/main/Images/similarity_test.jpg)
+
+With positive results from boardgame to boardgame calculations I'm confident in moving forward with category to boardgame calculations. I'm doing this step in place of "user to item" since my dataset does not have user data. However the results and operations are similar.
+```
+# CATEGORY-BOARDGAME CALCULATIONS - NO NEIGHBORS
+
+category = 'Adventure' # The id of the user for whom we want to generate recommendations
+category_index = data[data.Name == category].index.tolist()[0] # Get the frame index
+
+# Get the boardgames in selected category.
+category_boardgames = data_items.iloc[category_index]
+category_boardgames = category_boardgames[category_boardgames >0].index.values
+
+# Boardgames for all items as a sparse vector.
+user_rating_vector = data_items.iloc[category_index]
+
+# Calculate the score.
+score = data_matrix.dot(user_rating_vector).div(data_matrix.sum(axis=1))
+
+# Remove the known boardgames from the recommendation.
+score = score.drop(category_boardgames)
+```
+```
+print(category_boardgames)
+print(score.nlargest(20))
+```
+![cat-bg-noneighbor](https://github.com/Ryndine/recommend_boardgame/blob/main/Images/cat_bg_test.jpg)
+
+As you see from the results here the simularity between games is very low. The first print shows boardgames that share the category "Adventure" but we're removing from our recommendation. The results given from the score are all boardgames which are not inside the category "Adventure" but share simular categories as "Gloomhaven". When used with a user recommendation system, this would make it so a user would receive new recommendations that they haven't liked or disliked yet. 
+
+The only thing left to add to this system is neighbors in order to improve results, which I'm currently working on finishing.
