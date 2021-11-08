@@ -1,4 +1,4 @@
-# Boardgame Recommender System
+# Boardgame Recommendation System
 [Ryan Mangeno](https://github.com/Ryndine) | [Anny Tritchler](https://github.com/tritchlin/) | [Melissa Cardenas](https://github.com/melcardenas28)
 
 ## Objective: 
