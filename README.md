@@ -5,7 +5,7 @@
 The goal for this project is to implement everything we learned in our machine learning course into one final project within a week's time. After deliberation we settle on a boardgame recommender system. Reasoning because there are often far too many boardgames that exist which we do not know about, and recommendations are almost always through word of mouth. I personally do not know of any good recommendation systems out for this small industry.
 
 ## Tools & databases used:
-Python, Jupyter, Pandas, SQLite, Matplotlib, Scikit-Learn, Tensorflow, KMeans, KNearestNeighbor, Keras, Cosine Simularities.
+Python, Jupyter, Pandas, SQLite, Matplotlib, Scikit-Learn, Tensorflow, KMeans, KNearestNeighbor, Keras, Cosine Similarities.
 
 ## Resources:
 - [Kaggle 20,000 Boardgames Database](https://www.kaggle.com/extralime/20000-boardgames-dataset?select=boardgames1.csv)
