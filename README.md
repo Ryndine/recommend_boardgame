@@ -1,6 +1,5 @@
 # Boardgame Recommendation System
-[Ryan Mangeno](https://github.com/Ryndine) | [Anny Tritchler](https://github.com/tritchlin/) | [Melissa Cardenas](https://github.com/melcardenas28)
-
+[Ryan Mangeno](https://github.com/Ryndine) | [Anny Tritchler](https://github.com/tritchlin/)
 ## Objective: 
 The goal for this project is to implement everything we learned in our machine learning course into one final project within a week's time. After deliberation we settle on a boardgame recommender system. Reasoning because there are often far too many boardgames that exist which we do not know about, and recommendations are almost always through word of mouth. I personally do not know of any good recommendation systems out for this small industry.
 
